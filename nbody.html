@@ -1,0 +1,79 @@
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="nbody.css"></link>
+		<script type="text/javascript" src="nbody.js"></script>
+	</head>
+	<body>
+		<div id="sidebar">
+			<div class="title">N-body Simulator</div>
+			
+			<div id="settings" class="bottomline">
+				number of bodies:
+				<select id="number_of_bodies">
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+				</select>
+				<br/>
+				1 sec = 
+				<input type="text" id="body_rate_number" class="num_input" value="1"></input>
+				<select id="body_rate_unit">
+					<option value="86400">Days</option>
+					<option value="604800">Weeks</option>
+				</select>
+				<button onclick="applySettings();">APPLY</button>
+			</div>
+			
+			<div id="animation_controls" class="bottomline">
+				<button onclick="reset();">RESET</button>
+				<button onclick="play();">PLAY</button>
+				<button onclick="pause();">PAUSE</button>
+			</div>
+			
+			<div id="objects">
+				<div class="object" id="object_template">
+					<div class="headline">
+						<span class="ordinal">1:</span>
+						<input type="text" class="nickname" value="Nickname"></input>
+					</div>
+					<div class="inputbox">
+						mass (kg):
+						<input type="text" maxlength="5" class="num_input mass_coeff"></input>
+						e
+						<input type="text" maxlength="2" class="num_input mass_exp"></input>
+					</div>
+					<div class="inputbox">
+						velocity (m/s): [ 
+						<span class="vector">
+							<input class="num_input vel_x"></input>
+							,
+							<input class="num_input vel_y"></input>
+						</span>
+						]
+					</div>
+					<div class="inputbox coordinates">
+						position (AU): [ 
+						<span class="vector">
+							<input class="num_input pos_x"></input>
+							,
+							<input class="num_input pos_y"></input>
+						</span>
+						]
+					</div>
+					<div class="inputbox color_chooser">
+						color (RGB): #
+						<input type="text" maxlength="3" class="color_input color"></input>
+					</div>
+				</div>
+			</div>
+			
+
+		</div>
+		<div id="viewer">
+			<canvas id="canvas" width="800" height="800"></canvas>
+		</div>
+
+
+
+	</body>
+</html>

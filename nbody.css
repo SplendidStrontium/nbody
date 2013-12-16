@@ -1,0 +1,97 @@
+body{
+	font-family: "Lucida Grande";
+}
+		
+#sidebar{
+	width: 200px;
+	height: 780px;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	padding: 10px;
+	color: white;
+	background-color: #333;
+	border-right: 1px solid #777;
+}
+
+#viewer{
+	width: 800px;
+	height: 800px;
+	position: absolute;
+	left: 221px;
+	top: 0px;
+	background-color: black;
+}
+
+#sidebar .title{
+	font-size: 16pt;
+	margin-bottom: 5px;
+}
+
+#sidebar{
+	font-size: 8pt;
+}
+
+#sidebar .headline{
+	font-size: 20px;
+}
+
+#sidebar .object{
+	margin: 16px 0px;
+}
+
+#sidebar .bottomline{
+	padding: 10px 0px;
+	border-bottom: 1px solid white;
+}
+
+#object_template{
+	display: none;
+}
+
+#sidebar input{
+	background-color: #333;
+	border: 0px;
+	border-bottom: 1px solid #888;
+	color: #ccc;
+	vertical-align: top;
+	margin: 0px;
+	text-align: center;
+}
+#sidebar .inputbox{
+	margin: 3px 7px;
+}
+
+input.name{
+	height: 20px;
+	font-size: 16px;
+	width: 160px;
+	line-height: 20px;
+}
+
+#sidebar #animation_controls{
+	text-align: center;
+}
+
+#sidebar input{
+	font-family: Courier, monospace
+}
+
+#sidebar .num_input{
+	width: 40px;
+}
+
+#sidebar .color_input{
+	width: 25px;
+}
+
+#sidebar .vector{
+	font-size: 8pt;
+	color: #EBF;
+}
+
+
+
+
+
+/* CANVAS */
