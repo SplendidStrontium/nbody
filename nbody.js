@@ -21,7 +21,9 @@ var gravConst = parseFloat(6.674e-11) //m^3*kg^-1*s^-2
 // ANIMATION
 var secondsPerAnimatingMillisecond;
 var animating = false;
+var animationInterval = null;
 var animationPreviousTime = null;
+var animationStep = 20; // milliseconds between frames
 
 window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
                               window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
@@ -98,7 +100,7 @@ function applySettings(){
 		END STARTUP FUNCTIONS
 		
 		
-		BEGIN GLOBAL FUNCTIONS
+		BEGIN GLOBAL GENERAL FUNCTIONS
  */
 
 
@@ -120,52 +122,113 @@ function updateBodyFields(newnumberbodies, oldnumberbodies){
 	}
 }
 
+function clearValue(element){
+	element.value = "";
+}
+
+
+/*
+			END GLOBAL MISC FUNCTIONS
+
+			BEGIN GLOBAL ANIMATION FUNCTIONS
+*/
+
 function reset(){
-	bodies.map(function(body){ body.revertToInitialConditions(); });
-	redrawCanvas();
+	pause();
+	if( bodies.map(function(body){ body.revertToInitialConditions(); }) ){
+		// ensures redraw doesn't start until all bodies have reset their conditions
+		redrawCanvas();
+	}
 }
 
 function play(){
-	animating = true;
-	bodies.map(function(body){ body.saveInitialConditions(); });
-	window.requestAnimationFrame(frame);
+	if( bodies.map(function(body){ body.saveInitialConditions(); }) ){
+		// ensures animation doesn't start until all bodies have saved their conditions
+		animationInterval = window.setInterval(frame, animationStep);
+		// alternative call for animation: window.requestAnimationFrame(frame);
+	}
 }
 
 function pause(){
-	animating = false;
-	animationPreviousTime = null;
+	window.clearInterval(animationInterval);
 }
 
-function frame(timestamp){
-	if( animating ){ 
-		if(animationPreviousTime == null){
-			animationPreviousTime = timestamp;
-		}
-		var elapse = timestamp - animationPreviousTime;
-		var t_step = elapse * secondsPerAnimatingMillisecond;
-		console.log(t_step);
-		
-		// physics code
-		
-		for(i in bodies){
-			// total_acceleration = [0,0];
-			for(j in bodies){
-				/*
-					var acc = gravity bodies[i]  bodies[j];
-					total_acceleration[0] += acc[0];
-					total_acceleration[1] += acc[1];
-				*/
-			}
-			// you have all acceleration vectors for i. calculate stuff.
-			// bodies[i].computeKinematics(total_acceleration);
-		}
-		
-		
+function frame(){	
+	var epoch =  (new Date()).getTime();
+	var t_step = secondsPerAnimatingMillisecond * animationStep;
+	if(animationPreviousTime == null){
+		animationPreviousTime = epoch;
+		t_step = t_step / 2;
+		accel();
+		vel(t_step);
+	} else {
+		pos(t_step);
+		accel();
+		vel(t_step);
 		redrawCanvas();
-		animationPreviousTime = timestamp;
-		window.requestAnimationFrame(frame);
+	}
+	
+	animationPreviousTime = epoch;
+	//window.requestAnimationFrame(frame);
+}
+
+function accel(){
+	for(i in bodies){
+		var total_acceleration = [0,0];
+		for(j in bodies){
+			if (i != j){
+				var r = vect_diff( bodies[j].position, bodies[i].position );		
+				var mass_term = vect_scalar_mult( r, gravConst * bodies[j].mass );
+				var numerator = vect_sum( bodies[i].acceleration, mass_term );
+				total_acceleration = vect_sum( total_acceleration, vect_scalar_mult( numerator, 1/(Math.pow(dot(r,r), 1.5))) );
+			}
+		}
+		// you have all acceleration vectors for i. calculate stuff.
+		bodies[i].acceleration = total_acceleration;
 	}
 }
+
+function pos( step ){
+	for(i in bodies){
+		bodies[i].calculatePosition(step);
+	}
+}
+
+function vel( step ){
+	for(i in bodies){
+		bodies[i].calculateVelocity(step);
+	}
+}
+
+
+
+function dot(vect1, vect2){
+	return (vect1[_X] * vect2[_X]) + (vect1[_Y] * vect2[_Y]);
+}
+
+
+// vect1 - vect2
+function vect_diff( vect1, vect2 ){
+	return [  
+		vect1[_X] - vect2[_X],
+		vect1[_Y] - vect2[_Y]
+	];
+}
+
+function vect_sum( vect1, vect2 ){
+	return [  
+		vect1[_X] + vect2[_X],
+		vect1[_Y] + vect2[_Y]
+	];
+}
+
+function vect_scalar_mult( vect, scalar ){
+	return [  
+		vect[_X] * scalar,
+		vect[_Y] * scalar
+	];
+}
+
 
 
 
@@ -173,14 +236,21 @@ function frame(timestamp){
 
 function metersToPixels(meters){
 	var ret = (meters/metersPerPixel)+400;
-	console.log(ret);
 	return ret;
 }
 
 
 /*
-	END GLOBAL FUNCTIONS
+	END GLOBAL ANIMATION FUNCTIONS
+	
+	BEGIN GLOBAL PHYSICS FUNCTIONS
+*/
 
+
+
+
+/*
+	END GLOBAL PHYSICS FUNCTIONS
 	
 	BEGIN BODY FUNCTIONS
 */
@@ -226,13 +296,13 @@ Body.prototype.updatePositionView = function(){
 
 
 Body.prototype.saveInitialConditions = function(){
-	this.initialPosition = this.position;
-	this.initialVelocity = this.velocity;
+	this.initialPosition = this.position.slice(0); // slice ensures a deep copy instead of a pointer copy 
+	this.initialVelocity = this.velocity.slice(0);
 }
 
 Body.prototype.revertToInitialConditions = function(){
-	this.position = this.initialPosition;
-	this.velocity = this.initialVelocity;
+	this.position = this.initialPosition.slice(0);
+	this.velocity = this.initialVelocity.slice(0);
 }
 
 
@@ -248,13 +318,18 @@ Body.prototype.updateMass = function(){
 	}
 }
 
-Body.prototype.computeKinematics = function( accelerationArray ){
-	// update accel
-	
-	// recalculate velocity
-	
-	// reset position
+
+
+Body.prototype.calculatePosition = function( step ){
+	this.position = vect_sum( this.position, vect_scalar_mult( this.velocity, step) ); 
 }
+
+Body.prototype.calculateVelocity = function( step ){
+	this.velocity = vect_sum( this.velocity, vect_scalar_mult( this.acceleration, step) ); 
+}
+
+
+
 
 Body.prototype.updateColor = function(){
 	this.color = this.configurator.getElementsByClassName("color")[0].value;
@@ -262,18 +337,30 @@ Body.prototype.updateColor = function(){
 }
 
 Body.prototype.updateVelocityX = function(){
-	this.velocity[0] = parseFloat(this.configurator.getElementsByClassName("vel_x")[0].value);
+	var vel_box = this.configurator.getElementsByClassName("vel_x")[0];
+	var value = parseFloat(vel_box.value);
+	if( !value ){ vel_box.value = 0; value = 0; } 
+	this.velocity[_X] = value;
 }
 Body.prototype.updateVelocityY = function(){
-	this.velocity[1] = -parseFloat(this.configurator.getElementsByClassName("vel_y")[0].value);
+	var vel_box = this.configurator.getElementsByClassName("vel_y")[0];
+	var value = parseFloat(vel_box.value);
+	if( !value ){ vel_box.value = 0; value = 0; } 
+	this.velocity[_Y] = value;
 }
 
 Body.prototype.updatePositionX = function(){
-	this.position[0] = parseFloat(this.configurator.getElementsByClassName("pos_x")[0].value)*metersPerAU;
+	var pos_box = this.configurator.getElementsByClassName("pos_x")[0];
+	var value = parseFloat(pos_box.value)
+	if( !value ){ pos_box.value = 0; value = 0; }
+	this.position[_X] = value*metersPerAU;
 	redrawCanvas();
 }
 Body.prototype.updatePositionY = function(){
-	this.position[1] = -parseFloat(this.configurator.getElementsByClassName("pos_y")[0].value)*metersPerAU;
+	var pos_box = this.configurator.getElementsByClassName("pos_y")[0];
+	var value = parseFloat(pos_box.value)
+	if( !value ){ pos_box.value = 0; value = 0; }
+	this.position[_Y] = -value*metersPerAU;
 	redrawCanvas();	
 }
 

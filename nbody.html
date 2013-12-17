@@ -10,9 +10,10 @@
 			<div id="settings" class="bottomline">
 				number of bodies:
 				<select id="number_of_bodies">
-					<option value="1">1</option>
-					<option value="2">2</option>
+					<option value="2" selected="selected">2</option>
 					<option value="3">3</option>
+					<option value="4">4</option>
+					<option value="5">5</option>
 				</select>
 				<br/>
 				1 sec = 
@@ -45,24 +46,24 @@
 					<div class="inputbox">
 						velocity (m/s): [ 
 						<span class="vector">
-							<input class="num_input vel_x"></input>
+							<input class="num_input vel_x" value="0" onfocus="clearValue(this);"></input>
 							,
-							<input class="num_input vel_y"></input>
+							<input class="num_input vel_y" value="0" onfocus="clearValue(this);"></input>
 						</span>
 						]
 					</div>
 					<div class="inputbox coordinates">
 						position (AU): [ 
 						<span class="vector">
-							<input class="num_input pos_x"></input>
+							<input class="num_input pos_x" value="0" onfocus="clearValue(this);"></input>
 							,
-							<input class="num_input pos_y"></input>
+							<input class="num_input pos_y" value="0" onfocus="clearValue(this);"></input>
 						</span>
 						]
 					</div>
 					<div class="inputbox color_chooser">
 						color (RGB): #
-						<input type="text" maxlength="3" class="color_input color"></input>
+						<input type="text" maxlength="3" class="color_input color" value="fff" onfocus="clearValue(this);"></input>
 					</div>
 				</div>
 			</div>
