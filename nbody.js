@@ -22,8 +22,8 @@ var gravConst = parseFloat(6.674e-11) //m^3*kg^-1*s^-2
 var secondsPerAnimatingMillisecond;
 var animating = false;
 var animationInterval = null;
-var animationPreviousTime = null;
 var animationStep = 20; // milliseconds between frames
+var elapsedVirtualTime = 0;
 
 window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
                               window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
@@ -141,23 +141,28 @@ function reset(){
 	}
 }
 
-function play(){
-	if( bodies.map(function(body){ body.saveInitialConditions(); }) ){
-		// ensures animation doesn't start until all bodies have saved their conditions
-		animationInterval = window.setInterval(frame, animationStep);
-		// alternative call for animation: window.requestAnimationFrame(frame);
+function playpause(){
+	if( elapsedVirtualTime == 0 ){
+		if( bodies.map(function(body){ body.saveInitialConditions(); }) ){
+			// ensures animation doesn't start until all bodies have saved their conditions
+			animationInterval = window.setInterval(frame, animationStep);
+		}
+	} else {
+		pause();
 	}
 }
 
 function pause(){
-	window.clearInterval(animationInterval);
+	if( window.clearInterval(animationInterval) === undefined ){
+		elapsedVirtualTime = 0;
+	}	
 }
 
+
+
 function frame(){	
-	var epoch =  (new Date()).getTime();
 	var t_step = secondsPerAnimatingMillisecond * animationStep;
-	if(animationPreviousTime == null){
-		animationPreviousTime = epoch;
+	if(elapsedVirtualTime == 0){
 		t_step = t_step / 2;
 		accel();
 		vel(t_step);
@@ -168,8 +173,7 @@ function frame(){
 		redrawCanvas();
 	}
 	
-	animationPreviousTime = epoch;
-	//window.requestAnimationFrame(frame);
+	elapsedVirtualTime += t_step;
 }
 
 function accel(){
