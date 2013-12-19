@@ -28,11 +28,11 @@ var elapsedVirtualTime = 0;
 window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
                               window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
-
-
 /*	
-			BEGIN STARTUP FUNCTIONS
+	BEGIN STARTUP FUNCTIONS
  */
+ 
+// done once when window loads
 window.onload = function(){
     canvas = document.getElementById("canvas");
 	ctx = canvas.getContext('2d');
@@ -46,10 +46,12 @@ window.onload = function(){
 	applySettings();
 }
 
+// draws background for viewer
 function setupCanvas(){
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	ctx.strokeStyle = "#222";
 	var spacing = 20;
+	// draws gridlines
 	for( var i=spacing; i< 800; i+=spacing ){
 		ctx.beginPath();
 		ctx.moveTo(0, i);
@@ -64,12 +66,14 @@ function setupCanvas(){
 		ctx.stroke();
 	}
 	
+	// center dot
 	ctx.fillStyle = "#555";
 	ctx.beginPath();
 	ctx.arc(400, 400, 3, 0, 2*Math.PI, true);
 	ctx.closePath();
 	ctx.fill();
 	
+	// circles at 1 AU, 2 AU
 	ctx.strokeStyle = "#555";
 	for( var i=1; i<3; i++ ){ 
 		ctx.beginPath();
@@ -95,20 +99,15 @@ function applySettings(){
 	secondsPerAnimatingMillisecond = (parseFloat(rate_input.value) * parseInt(rate_selector.value)) / 1000;
 }
 
-
 /*
-		END STARTUP FUNCTIONS
+	END STARTUP FUNCTIONS
 		
 		
-		BEGIN GLOBAL GENERAL FUNCTIONS
+	BEGIN GLOBAL MISC FUNCTIONS
  */
 
 
-
-/*
-UPDATES BODIES
-CURRENTLY ASSUMES PARAMETERS NEVER EQUAL
-*/
+// parameters should never be equal (fix this)
 function updateBodyFields(newnumberbodies, oldnumberbodies){
 	var diff = newnumberbodies - oldnumberbodies;
 	if (diff > 0) {
@@ -126,11 +125,10 @@ function clearValue(element){
 	element.value = "";
 }
 
-
 /*
-			END GLOBAL MISC FUNCTIONS
+	END GLOBAL MISC FUNCTIONS
 
-			BEGIN GLOBAL ANIMATION FUNCTIONS
+	BEGIN GLOBAL ANIMATION FUNCTIONS
 */
 
 function reset(){
@@ -159,10 +157,10 @@ function pause(){
 }
 
 
-
+// calls physics functions on bodies
 function frame(){	
 	var t_step = secondsPerAnimatingMillisecond * animationStep;
-	if(elapsedVirtualTime == 0){
+	if(elapsedVirtualTime == 0){ // half step approx
 		t_step = t_step / 2;
 		accel();
 		vel(t_step);
@@ -187,7 +185,6 @@ function accel(){
 				total_acceleration = vect_sum( total_acceleration, vect_scalar_mult( numerator, 1/(Math.pow(dot(r,r), 1.5))) );
 			}
 		}
-		// you have all acceleration vectors for i. calculate stuff.
 		bodies[i].acceleration = total_acceleration;
 	}
 }
@@ -204,12 +201,10 @@ function vel( step ){
 	}
 }
 
-
-
+// dot product
 function dot(vect1, vect2){
 	return (vect1[_X] * vect2[_X]) + (vect1[_Y] * vect2[_Y]);
 }
-
 
 // vect1 - vect2
 function vect_diff( vect1, vect2 ){
@@ -233,11 +228,7 @@ function vect_scalar_mult( vect, scalar ){
 	];
 }
 
-
-
-
-
-
+// MUST BE UPDATED IF VIEWER RESOLUTION CHANGES
 function metersToPixels(meters){
 	var ret = (meters/metersPerPixel)+400;
 	return ret;
@@ -247,14 +238,6 @@ function metersToPixels(meters){
 /*
 	END GLOBAL ANIMATION FUNCTIONS
 	
-	BEGIN GLOBAL PHYSICS FUNCTIONS
-*/
-
-
-
-
-/*
-	END GLOBAL PHYSICS FUNCTIONS
 	
 	BEGIN BODY FUNCTIONS
 */
@@ -322,8 +305,6 @@ Body.prototype.updateMass = function(){
 	}
 }
 
-
-
 Body.prototype.calculatePosition = function( step ){
 	this.position = vect_sum( this.position, vect_scalar_mult( this.velocity, step) ); 
 }
@@ -331,9 +312,6 @@ Body.prototype.calculatePosition = function( step ){
 Body.prototype.calculateVelocity = function( step ){
 	this.velocity = vect_sum( this.velocity, vect_scalar_mult( this.acceleration, step) ); 
 }
-
-
-
 
 Body.prototype.updateColor = function(){
 	this.color = this.configurator.getElementsByClassName("color")[0].value;
@@ -346,6 +324,7 @@ Body.prototype.updateVelocityX = function(){
 	if( !value ){ vel_box.value = 0; value = 0; } 
 	this.velocity[_X] = value;
 }
+
 Body.prototype.updateVelocityY = function(){
 	var vel_box = this.configurator.getElementsByClassName("vel_y")[0];
 	var value = parseFloat(vel_box.value);
@@ -360,6 +339,7 @@ Body.prototype.updatePositionX = function(){
 	this.position[_X] = value*metersPerAU;
 	redrawCanvas();
 }
+
 Body.prototype.updatePositionY = function(){
 	var pos_box = this.configurator.getElementsByClassName("pos_y")[0];
 	var value = parseFloat(pos_box.value)
