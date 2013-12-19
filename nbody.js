@@ -364,7 +364,7 @@ Body.prototype.updatePositionY = function(){
 	var pos_box = this.configurator.getElementsByClassName("pos_y")[0];
 	var value = parseFloat(pos_box.value)
 	if( !value ){ pos_box.value = 0; value = 0; }
-	this.position[_Y] = -value*metersPerAU;
+	this.position[_Y] = value*metersPerAU;
 	redrawCanvas();	
 }
 
